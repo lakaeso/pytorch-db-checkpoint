@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import pickle
 from configparser import ConfigParser
+import json
 
 
 class DBHandler:
@@ -32,7 +33,7 @@ class DBHandler:
         except (psycopg2.DatabaseError, Exception) as error:
             print(error)
     
-    def save_training_state(self, model: nn.Module, epoch: int, optim: torch.optim.Optimizer, loss: nn.Module):
+    def save_training_state(self, model_name: str, epoch: int, model: nn.Module, optim: torch.optim.Optimizer, metrics: dict = None, comment: str = None):
 
         # TODO: check if model with the same name exists but with larger epoch number
         # ask user to overwrite? or overwrite flag??
@@ -41,11 +42,13 @@ class DBHandler:
 
         optim_state_dict = pickle.dumps(optim.state_dict())
 
+        metrics_str = json.dumps(metrics)
+
         with self._create_connection() as conn:
             
             cur = conn.cursor()
             
-            cur.execute("INSERT INTO training_checkpoint (epoch, model_name, model_state_dict, optim_state_dict, timestamp_inserted, comment) VALUES (%s, %s, %s, %s, current_timestamp, %s)", (epoch, "m", model_state_dict, optim_state_dict, "blah"))
+            cur.execute("INSERT INTO training_checkpoint (epoch, model_name, model_state_dict, optim_state_dict, timestamp_inserted, comment, metrics) VALUES (%s, %s, %s, %s, current_timestamp, %s, %s)", (epoch, model_name, model_state_dict, optim_state_dict, comment, metrics_str))
             
             conn.commit()
             
@@ -53,13 +56,15 @@ class DBHandler:
         
         conn.close()
     
-    def load_training_state(self, model, optim):
+    def load_training_state(self, model, optim, model_name):
         
         with self._create_connection() as conn:
         
             cur = conn.cursor()
 
-            cur.execute("SELECT * FROM training_checkpoint WHERE model_name = %s ORDER BY epoch DESC", ("m"))
+            cur.execute("SELECT * FROM training_checkpoint WHERE model_name = %s ORDER BY epoch DESC", (model_name, ))
+
+            # TODO: add not found exception
 
             obj = cur.fetchone()
 
