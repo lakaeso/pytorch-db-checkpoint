@@ -1,0 +1,8 @@
+database.ini
+model.pt
+model.py
+program.py
+data
+.vscode
+.venv
+__pycache__
