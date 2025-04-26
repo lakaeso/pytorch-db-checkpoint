@@ -56,13 +56,37 @@ class DBHandler:
         
         conn.close()
     
-    def load_training_state(self, model, optim, model_name):
+    def load_training_state_last_epoch(self, model, optim, model_name):
         
         with self._create_connection() as conn:
         
             cur = conn.cursor()
 
             cur.execute("SELECT * FROM training_checkpoint WHERE model_name = %s ORDER BY epoch DESC", (model_name, ))
+
+            # TODO: add not found exception
+
+            obj = cur.fetchone()
+
+            epoch = obj[1]
+
+            model.load_state_dict(pickle.loads(obj[3]))
+
+            optim.load_state_dict(pickle.loads(obj[4]))
+
+            cur.close()
+
+        conn.close()
+
+        return epoch, model, optim
+    
+    def load_training_state_last_entry(self, model, optim, model_name):
+        
+        with self._create_connection() as conn:
+        
+            cur = conn.cursor()
+
+            cur.execute("SELECT * FROM training_checkpoint WHERE model_name = %s ORDER BY timestamp_inserted DESC", (model_name, ))
 
             # TODO: add not found exception
 
