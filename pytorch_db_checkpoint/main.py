@@ -48,7 +48,15 @@ class DBHandler:
             
             cur = conn.cursor()
             
-            cur.execute("INSERT INTO training_checkpoint (epoch, model_name, model_state_dict, optim_state_dict, timestamp_inserted, comment, metrics) VALUES (%s, %s, %s, %s, current_timestamp, %s, %s)", (epoch, model_name, model_state_dict, optim_state_dict, comment, metrics_str))
+            cur.execute(
+                """
+                INSERT INTO training_checkpoint 
+                        (epoch, model_name, model_state_dict, optim_state_dict, timestamp_inserted, comment, metrics) 
+                VALUES 
+                        (%s, %s, %s, %s, current_timestamp, %s, %s)
+                """, 
+                (epoch, model_name, model_state_dict, optim_state_dict, comment, metrics_str)
+            )
             
             conn.commit()
             
@@ -62,7 +70,19 @@ class DBHandler:
         
             cur = conn.cursor()
 
-            cur.execute("SELECT * FROM training_checkpoint WHERE model_name = %s ORDER BY epoch DESC", (model_name, ))
+            cur.execute(
+                """
+                SELECT 
+                    * 
+                FROM 
+                    training_checkpoint 
+                WHERE 
+                    model_name = %s 
+                ORDER BY 
+                    epoch DESC
+                """, 
+                (model_name, )
+            )
 
             # TODO: add not found exception
 
@@ -86,7 +106,19 @@ class DBHandler:
         
             cur = conn.cursor()
 
-            cur.execute("SELECT * FROM training_checkpoint WHERE model_name = %s ORDER BY timestamp_inserted DESC", (model_name, ))
+            cur.execute(
+                """
+                SELECT 
+                    * 
+                FROM 
+                    training_checkpoint 
+                WHERE 
+                    model_name = %s 
+                ORDER BY 
+                    timestamp_inserted DESC
+                """, 
+                (model_name, )
+            )
 
             # TODO: add not found exception
 
