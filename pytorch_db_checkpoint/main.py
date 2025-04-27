@@ -10,10 +10,10 @@ class DBHandler:
 
     _config = {}
 
-    def __init__(self):
-        self._config = self._load_config()
+    def __init__(self, path_to_config, section='postgresql'):
+        self._config = self._load_config(path_to_config, section)
 
-    def _load_config(self, filename='database.ini', section='postgresql'):
+    def _load_config(self, filename, section):
         parser = ConfigParser()
         parser.read(filename)
         config = {}
