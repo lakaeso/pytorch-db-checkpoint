@@ -1,12 +1,13 @@
-# pytorch db checkpoint
-Checkpoint your PyTorch training runs into PostgreSQL database.
+# pytorch_db_checkpoint
+Checkpoint PyTorch training runs into PostgreSQL database.
 
 Save model weights, optimizer state and metrics at any time. This library allows you to save your model and not worry about .pt files scattered across your file system.
 
 ## Quickstart
+* Set up database schema (DDL available in ```src/ddl``` folder)
 * Import DBHandler from the package
 * Instantiate DBHandler class with a path to config file
-* Use avaiable methods to save or load model and optim state
+* Use available methods to save or load model and optim state
 
 ## Config file example - database.ini
 
