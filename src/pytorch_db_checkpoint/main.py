@@ -1,6 +1,7 @@
 import psycopg2
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import pickle
 from configparser import ConfigParser
 import json
@@ -38,13 +39,23 @@ class DBHandler:
             with self._create_connection() as conn:
                 with conn.cursor() as cur:
                     kwargs["cur"] = cur
-                    func(self, *args, **kwargs)
+                    return_value = func(self, *args, **kwargs)
                     cur.close()
+            return return_value
         return wrapper
     
     @_connection_decorator
-    def save_training_state(self, model_name: str, epoch: int, model: nn.Module, optim: torch.optim.Optimizer, metrics: dict = None, comment: str = None, *args, **kwargs):
-
+    def save_training_state(self, model_name: str, epoch: int, model: nn.Module, optim: optim.Optimizer, metrics: dict = None, comment: str = None, *args, **kwargs):
+        """
+        Saves training state to a database.
+        
+        :param str model_name: Name under which model will be saved
+        :param int epoch: Current epoch number
+        :param nn.Module model: PyTorch model
+        :param optim.Optimizer: PyTorch optimizer
+        :param dict metrics: Python dictionary of training metrics (accuracy, f1 ...)
+        :param str comment: Your comment, if you have any
+        """
         # TODO: check if model with the same name exists but with larger epoch number
         # ask user to overwrite? or overwrite flag??
 
@@ -67,7 +78,14 @@ class DBHandler:
         )
     
     @_connection_decorator
-    def load_training_state_last_epoch(self, model, optim, model_name, *args, **kwargs):
+    def load_training_state_last_epoch(self, model_name: str, model: nn.Module, optim: optim.Optimizer | None, *args, **kwargs):
+        """
+        Load training state by model name and last epoch.
+        
+        :param str model_name: Name of the model to load
+        :param nn.Module model: PyTorch model
+        :param optim.Optimizer: PyTorch optimizer
+        """
 
         cur = kwargs["cur"]
         
@@ -93,13 +111,21 @@ class DBHandler:
 
         model.load_state_dict(pickle.loads(obj[3]))
 
-        optim.load_state_dict(pickle.loads(obj[4]))
+        if optim is not None:
+            optim.load_state_dict(pickle.loads(obj[4]))
 
         return epoch, model, optim
     
     @_connection_decorator
-    def load_training_state_last_entry(self, model, optim, model_name, *args, **kwargs):
-
+    def load_training_state_last_entry(self, model_name: str, model: nn.Module, optim: optim.Optimizer | None, *args, **kwargs):
+        """
+        Load training state by model name and last entry.
+        
+        :param str model_name: Name of the model to load
+        :param nn.Module model: PyTorch model
+        :param optim.Optimizer: PyTorch optimizer
+        """
+        
         cur = kwargs["cur"]
     
         cur.execute(
@@ -124,6 +150,7 @@ class DBHandler:
 
         model.load_state_dict(pickle.loads(obj[3]))
 
-        optim.load_state_dict(pickle.loads(obj[4]))
+        if optim is not None:
+            optim.load_state_dict(pickle.loads(obj[4]))
 
         return epoch, model, optim
