@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PyTorchDBCheckpoint"
+version = "0.0.1"
+authors = [
+  { name="lakaeso", email="antonio.lakos1@gmail.com" },
+]
+description = "Checkpoint PyTorch training runs into PostgreSQL database."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+dependencies = [
+  'torch >= 2.6.0',
+  'psycopg2 >= 2.9.0',
+  'numpy'
+]
+
+[project.urls]
+Homepage = ""
