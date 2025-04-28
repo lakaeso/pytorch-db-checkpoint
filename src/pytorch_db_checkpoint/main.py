@@ -1,32 +1,47 @@
 import psycopg2
-import torch
 import torch.nn as nn
 import torch.optim as optim
 import pickle
 from configparser import ConfigParser
 import json
+from pathlib import Path
 
 
-class DBHandler:
-
+class PostgresHandler:
+    """Abstracts access to PostgreSQL database."""
     _config = {}
 
-    def __init__(self, path_to_config, section='postgresql'):
+    def __init__(self, path_to_config: str | Path, section: str ='postgresql') -> None:
+        """
+        Inits PostgresHandler instance.
+        
+        :param str | Path path_to_config: Path to config ```.ini``` file
+        :param str section: Section in config file
+        """
         self._config = self._load_config(path_to_config, section)
 
-    def _load_config(self, filename, section):
+    def _load_config(self, path_to_config: str | Path, section: str) -> dict:
+        """
+        Loads config file from path and returns it in a form of a dictionary.
+        
+        :param str | Path path_to_config: Path to config ```.ini``` file
+        :param str section: Section in config file
+        """
         parser = ConfigParser()
-        parser.read(filename)
+        parser.read(path_to_config)
         config = {}
         if parser.has_section(section):
             params = parser.items(section)
             for param in params:
                 config[param[0]] = param[1]
         else:
-            raise Exception(f'Section {section} not found in the {filename} file.')
+            raise Exception(f'Section {section} not found in the {path_to_config} file.')
         return config
     
     def _create_connection(self):
+        """
+        Creates ```psycopg2``` connection.
+        """
         config = self._config
         try:
             with psycopg2.connect(**config) as conn:
@@ -35,6 +50,11 @@ class DBHandler:
             print(error)
     
     def _connection_decorator(func):
+        """
+        Decorator for methods which access the database.
+
+        Appends psycopg2 cursor ```cur``` object to function's kwargs.
+        """
         def wrapper(self, *args, **kwargs):
             with self._create_connection() as conn:
                 with conn.cursor() as cur:
@@ -56,8 +76,6 @@ class DBHandler:
         :param dict metrics: Python dictionary of training metrics (accuracy, f1 ...)
         :param str comment: Your comment, if you have any
         """
-        # TODO: check if model with the same name exists but with larger epoch number
-        # ask user to overwrite? or overwrite flag??
 
         cur = kwargs["cur"]
 
@@ -103,8 +121,6 @@ class DBHandler:
             (model_name, )
         )
 
-        # TODO: add not found exception
-
         obj = cur.fetchone()
 
         epoch = obj[1]
@@ -141,8 +157,6 @@ class DBHandler:
             """, 
             (model_name, )
         )
-
-        # TODO: add not found exception
 
         obj = cur.fetchone()
 
