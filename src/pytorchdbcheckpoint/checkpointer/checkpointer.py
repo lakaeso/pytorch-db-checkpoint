@@ -3,7 +3,7 @@ import torch.optim as optim
 import pickle
 import json
 from pathlib import Path
-from ..handler import HandlerFactory, CheckpointData
+from ..utils import HandlerFactory, CheckpointData
 
 class DefaultCheckpointer:
     """Default class used for checkpoint PyTorch training runs or experiments."""

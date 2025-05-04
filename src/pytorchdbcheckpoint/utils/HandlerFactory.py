@@ -1,5 +1,5 @@
 from pathlib import Path
-from . import PostgresHandler, MongoHandler
+from ..handler import PostgresHandler, MongoHandler
 
 
 
@@ -13,4 +13,4 @@ class HandlerFactory:
             return PostgresHandler(path_to_config, section)
         if handler == 'mongo':
             return MongoHandler(path_to_config, section)
-        raise Exception("Error. No such handler.")
+        raise Exception(f"Error, no handler matching {handler}.")

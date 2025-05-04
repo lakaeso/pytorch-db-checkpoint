@@ -1,9 +1,10 @@
 import psycopg2
 from configparser import ConfigParser
 from pathlib import Path
-from .checkpoint_data import CheckpointData
+from ..utils import CheckpointData
 import pickle
 import json
+
 
 
 class PostgresHandler:
