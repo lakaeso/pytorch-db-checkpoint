@@ -7,8 +7,8 @@ from ..handler import HandlerFactory
 
 class DefaultCheckpointer:
     """Default class used for checkpoint PyTorch training runs or experiments."""
-    
-    def __init__(self, handler: str, path_to_config: str | Path, section: str):
+
+    def __init__(self, handler: str, path_to_config: str | Path, section: str, verbose: bool = False):
         """
         Inits DefaultCheckpointer class.
         
@@ -17,6 +17,10 @@ class DefaultCheckpointer:
         :param str section: Section in .ini config file
         """
         self.handler = HandlerFactory.get_handler(handler, path_to_config, section)
+        self.verbose = verbose
+
+        if self.verbose: 
+            print(f"DefaultCheckpointer init done, {handler=}.")
 
     def save_training_state(self, model_name: str, epoch: int, model: nn.Module, optim: optim.Optimizer, metrics: dict = None, comment: str = None, *args, **kwargs):
         """
@@ -29,6 +33,8 @@ class DefaultCheckpointer:
         :param dict metrics: Python dictionary of training metrics (accuracy, f1 ...)
         :param str comment: Your comment, if you have any
         """
+        if self.verbose: 
+            print(f"DefaultCheckpointer saving traning state, {model_name=}, {epoch=}")
 
         model_state_dict = pickle.dumps(model.state_dict())
 
@@ -46,6 +52,8 @@ class DefaultCheckpointer:
         :param nn.Module model: PyTorch model
         :param optim.Optimizer: PyTorch optimizer
         """
+        if self.verbose: 
+            print(f"DefaultCheckpointer loading traning state by last epoch, {model_name=}")
 
         obj = self.handler.load_training_state_last_epoch(model_name)
 
@@ -66,6 +74,8 @@ class DefaultCheckpointer:
         :param nn.Module model: PyTorch model
         :param optim.Optimizer: PyTorch optimizer
         """
+        if self.verbose: 
+            print(f"DefaultCheckpointer loading traning state by last entry, {model_name=}")
         
         obj = self.handler.load_training_state_last_entry(model_name)
 
