@@ -36,12 +36,6 @@ class DefaultCheckpointer:
         if self.verbose: 
             print(f"DefaultCheckpointer saving traning state, {model_name=}, {epoch=}")
 
-        model_state_dict = pickle.dumps(model.state_dict())
-
-        optim_state_dict = pickle.dumps(optim.state_dict())
-
-        metrics_str = json.dumps(metrics)
-
         data = CheckpointData(model_name=model_name, epoch=epoch, model=model, optim=optim, metrics=metrics, comment=comment)
 
         self.handler.save_training_state(data)
