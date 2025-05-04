@@ -9,12 +9,12 @@ from pathlib import Path
 class HandlerFactory:
     """Used for fetching a handler type."""
     @staticmethod
-    def get_handler(keyword: str):
-        """Returns wanted handler type based on parameter ```keyword```. Throws Exception if no matching keywork found."""
-        if keyword == 'postgres':
-            return PostgresHandler
-        if keyword == 'mongo':
-            return MongoHandler
+    def get_handler(handler: str, path_to_config: str | Path, section: str):
+        """Returns wanted handler based on parameter ```keyword```. Throws Exception if no matching keywork found."""
+        if handler == 'postgres':
+            return PostgresHandler(path_to_config, section)
+        if handler == 'mongo':
+            return MongoHandler(path_to_config, section)
         raise Exception("Error. No such handler.")
 
 class DefaultCheckpointer:
@@ -27,8 +27,7 @@ class DefaultCheckpointer:
         :param str | Path path_to_config: Path to .ini config file
         :param str section: Section in .ini config file
         """
-        handler_class = HandlerFactory.get_handler(handler)
-        self.handler = handler_class(path_to_config, section)
+        self.handler = HandlerFactory.get_handler(handler, path_to_config, section)
 
     def save_training_state(self, model_name: str, epoch: int, model: nn.Module, optim: optim.Optimizer, metrics: dict = None, comment: str = None, *args, **kwargs):
         """
