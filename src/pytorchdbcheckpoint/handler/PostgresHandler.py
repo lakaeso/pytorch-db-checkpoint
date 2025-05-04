@@ -1,7 +1,9 @@
 import psycopg2
 from configparser import ConfigParser
 from pathlib import Path
-
+from .checkpoint_data import CheckpointData
+import pickle
+import json
 
 
 class PostgresHandler:
@@ -62,10 +64,21 @@ class PostgresHandler:
         return wrapper
     
     @_connection_decorator
-    def save_training_state(self, epoch: int, model_name: str, model_state_dict: bytes, optim_state_dict: bytes, comment: str, metrics_str: str, *args, **kwargs):
+    def save_training_state(self, data: CheckpointData , *args, **kwargs):
+        """Saves ```CheckpointData``` object into a database. """
         
+        # get data
+        epoch = data.epoch
+        model_name = data.model_name
+        model_state_dict = pickle.dumps(data.model.state_dict())
+        optim_state_dict = pickle.dumps(data.optim.state_dict())
+        comment = data.comment
+        metrics_str = json.dumps(data.metrics)
+
+        # get cursor (db connection)
         cur = kwargs["cur"]
-    
+
+        # execute query
         cur.execute(
             """
             INSERT INTO training_checkpoint 

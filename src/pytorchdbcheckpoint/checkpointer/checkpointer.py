@@ -3,7 +3,7 @@ import torch.optim as optim
 import pickle
 import json
 from pathlib import Path
-from ..handler import HandlerFactory
+from ..handler import HandlerFactory, CheckpointData
 
 class DefaultCheckpointer:
     """Default class used for checkpoint PyTorch training runs or experiments."""
@@ -42,7 +42,9 @@ class DefaultCheckpointer:
 
         metrics_str = json.dumps(metrics)
 
-        self.handler.save_training_state(epoch, model_name, model_state_dict, optim_state_dict, comment, metrics_str)
+        data = CheckpointData(model_name=model_name, epoch=epoch, model=model, optim=optim, metrics=metrics, comment=comment)
+
+        self.handler.save_training_state(data)
     
     def load_training_state_last_epoch(self, model_name: str, model: nn.Module, optim: optim.Optimizer | None, *args, **kwargs):
         """
