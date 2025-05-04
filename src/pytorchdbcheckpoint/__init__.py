@@ -1,1 +1,1 @@
-from .main import PostgresHandler
+from .main import DefaultCheckpointer, PostgresHandler
