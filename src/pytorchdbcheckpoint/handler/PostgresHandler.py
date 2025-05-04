@@ -71,8 +71,8 @@ class PostgresHandler:
         # get data
         epoch = data.epoch
         model_name = data.model_name
-        model_state_dict = pickle.dumps(data.model.state_dict())
-        optim_state_dict = pickle.dumps(data.optim.state_dict())
+        model_state_dict = pickle.dumps(data.model_state_dict)
+        optim_state_dict = pickle.dumps(data.optim_state_dict)
         comment = data.comment
         metrics_str = json.dumps(data.metrics)
 
@@ -91,7 +91,7 @@ class PostgresHandler:
         )
 
     @_connection_decorator
-    def load_training_state_last_epoch(self, model_name: str, *args, **kwargs):
+    def load_training_state_last_epoch(self, model_name: str, *args, **kwargs) -> CheckpointData:
         
         cur = kwargs["cur"]
         
@@ -109,12 +109,21 @@ class PostgresHandler:
             (model_name, )
         )
 
-        obj = cur.fetchone()
+        row = cur.fetchone()
 
-        return obj
+        data = CheckpointData(
+            model_name=None, 
+            epoch=row[1], 
+            model_state_dict=pickle.loads(row[3]), 
+            optim_state_dict=pickle.loads(row[4]),
+            metrics=None, 
+            comment=None
+        )
+
+        return data
     
     @_connection_decorator
-    def load_training_state_last_entry(self, model_name: str, *args, **kwargs):
+    def load_training_state_last_entry(self, model_name: str, *args, **kwargs) -> CheckpointData:
 
         cur = kwargs["cur"]
     
@@ -132,6 +141,15 @@ class PostgresHandler:
             (model_name, )
         )
 
-        obj = cur.fetchone()
+        row = cur.fetchone()
 
-        return obj
+        data = CheckpointData(
+            model_name=None, 
+            epoch=row[1], 
+            model_state_dict=pickle.loads(row[3]), 
+            optim_state_dict=pickle.loads(row[4]), 
+            metrics=None, 
+            comment=None
+        )
+
+        return data

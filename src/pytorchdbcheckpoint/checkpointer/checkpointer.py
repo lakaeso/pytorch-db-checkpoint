@@ -36,7 +36,7 @@ class DefaultCheckpointer:
         if self.verbose: 
             print(f"DefaultCheckpointer saving traning state, {model_name=}, {epoch=}")
 
-        data = CheckpointData(model_name=model_name, epoch=epoch, model=model, optim=optim, metrics=metrics, comment=comment)
+        data = CheckpointData(model_name=model_name, epoch=epoch, model_state_dict=model.state_dict(), optim_state_dict=optim.state_dict(), metrics=metrics, comment=comment)
 
         self.handler.save_training_state(data)
     
@@ -51,14 +51,14 @@ class DefaultCheckpointer:
         if self.verbose: 
             print(f"DefaultCheckpointer loading traning state by last epoch, {model_name=}")
 
-        obj = self.handler.load_training_state_last_epoch(model_name)
+        data = self.handler.load_training_state_last_epoch(model_name)
 
-        epoch = obj[1]
+        epoch = data.epoch
 
-        model.load_state_dict(pickle.loads(obj[3]))
+        model.load_state_dict(data.model_state_dict)
 
         if optim is not None:
-            optim.load_state_dict(pickle.loads(obj[4]))
+            optim.load_state_dict(data.optim_state_dict)
 
         return epoch, model, optim
     
@@ -73,14 +73,14 @@ class DefaultCheckpointer:
         if self.verbose: 
             print(f"DefaultCheckpointer loading traning state by last entry, {model_name=}")
         
-        obj = self.handler.load_training_state_last_entry(model_name)
+        data = self.handler.load_training_state_last_entry(model_name)
 
-        epoch = obj[1]
+        epoch = data.epoch
 
-        model.load_state_dict(pickle.loads(obj[3]))
-
+        model.load_state_dict(data.model_state_dict)
+        
         if optim is not None:
-            optim.load_state_dict(pickle.loads(obj[4]))
+            optim.load_state_dict(data.optim_state_dict)
 
         return epoch, model, optim
     
